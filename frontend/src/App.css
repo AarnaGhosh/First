@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap');
 
 .App {
-  background: linear-gradient(135deg, #0a4d0a 0%, #0d5d0d 50%, #0a4d0a 100%);
+  background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #87CEEB 100%);
   min-height: 100vh;
-  font-family: 'Orbitron', 'Space Mono', monospace;
+  font-family: 'Orbitron', 'Press Start 2P', monospace;
 }
 
 .retro-game-container {
@@ -13,22 +13,28 @@
 }
 
 .retro-button {
-  font-family: 'Orbitron', 'Space Mono', monospace !important;
+  font-family: 'Orbitron', 'Press Start 2P', monospace !important;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   border: 3px solid;
   transition: all 0.3s ease;
   box-shadow: 
-    0 0 15px rgba(0, 255, 65, 0.4),
-    inset 0 0 10px rgba(0, 255, 65, 0.1);
-  background: linear-gradient(145deg, transparent, rgba(0, 255, 65, 0.1));
+    0 0 15px rgba(34, 139, 34, 0.4),
+    inset 0 0 10px rgba(34, 139, 34, 0.1);
+  background: linear-gradient(145deg, transparent, rgba(34, 139, 34, 0.1));
+  min-width: 140px;
+  padding: 12px 20px;
 }
 
 .retro-button:hover {
   box-shadow: 
-    0 0 25px rgba(0, 255, 65, 0.7),
-    inset 0 0 15px rgba(0, 255, 65, 0.2);
-  transform: translateY(-3px) scale(1.05);
+    0 0 25px rgba(34, 139, 34, 0.7),
+    inset 0 0 15px rgba(34, 139, 34, 0.2);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.retro-button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Pulse animation for emphasis */
@@ -38,7 +44,7 @@
     text-shadow: 0 0 20px currentColor;
   }
   50% { 
-    opacity: 0.8; 
+    opacity: 0.85; 
     text-shadow: 0 0 30px currentColor;
   }
 }
@@ -47,7 +53,7 @@
   animation: pulse 2s infinite;
 }
 
-/* Retro glow effects */
+/* Enhanced glow effects */
 .retro-game-container h1 {
   text-shadow: 
     0 0 10px currentColor,
@@ -59,78 +65,61 @@
   text-shadow: 0 0 8px currentColor;
 }
 
-/* Scanlines effect for retro feel */
-canvas::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    transparent 48%, 
-    rgba(0, 255, 65, 0.03) 49%,
-    rgba(0, 255, 65, 0.03) 51%,
-    transparent 52%
-  );
-  background-size: 100% 4px;
-  pointer-events: none;
-  z-index: 1;
+/* Mario-style platform shadows */
+canvas {
+  filter: contrast(1.1) brightness(1.05) saturate(1.1);
+  border-radius: 12px;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.1),
+    0 0 30px rgba(34, 139, 34, 0.3),
+    0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar with Mario theme */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a4d0a;
-  border-radius: 5px;
+  background: linear-gradient(45deg, #87CEEB, #98FB98);
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #00FF41, #00CC33);
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  background: linear-gradient(45deg, #228B22, #32CD32);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(34, 139, 34, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #00CC33, #00FF41);
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+  background: linear-gradient(45deg, #32CD32, #228B22);
+  box-shadow: 0 0 15px rgba(34, 139, 34, 0.8);
 }
 
-/* Body styling */
+/* Body styling with Mario theme */
 body {
-  font-family: 'Orbitron', 'Space Mono', monospace !important;
-  background: linear-gradient(135deg, #0a4d0a 0%, #0d5d0d 50%, #0a4d0a 100%);
-  color: #00FF41;
+  font-family: 'Orbitron', 'Press Start 2P', monospace !important;
+  background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #87CEEB 100%);
+  color: #2E8B57;
   margin: 0;
   overflow-x: hidden;
 }
 
-/* Enhanced card styling */
+/* Enhanced card styling with platformer theme */
 .bg-gray-900 {
-  background: linear-gradient(145deg, #1a3d1a, #0f2f0f) !important;
+  background: linear-gradient(145deg, #1a401a, #0f2f0f) !important;
   box-shadow: 
-    inset 0 0 30px rgba(0, 255, 65, 0.1),
-    0 0 40px rgba(0, 255, 65, 0.2),
-    0 15px 35px rgba(0, 0, 0, 0.5) !important;
-  border: 3px solid #00FF41 !important;
-}
-
-/* Game canvas effects */
-canvas {
-  filter: contrast(1.15) brightness(1.1) saturate(1.2);
-  border-radius: 10px;
-  box-shadow: 
-    inset 0 0 20px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(0, 255, 65, 0.3);
+    inset 0 0 30px rgba(34, 139, 34, 0.1),
+    0 0 40px rgba(34, 139, 34, 0.2),
+    0 15px 35px rgba(0, 0, 0, 0.4) !important;
+  border: 3px solid #228B22 !important;
+  border-radius: 15px !important;
 }
 
 /* Font styling */
 .font-mono {
-  font-family: 'Orbitron', 'Space Mono', monospace !important;
-  letter-spacing: 2px;
+  font-family: 'Orbitron', 'Press Start 2P', monospace !important;
+  letter-spacing: 1px;
 }
 
 /* Birthday theme enhancements */
@@ -141,38 +130,38 @@ canvas {
 
 .border-green-500 {
   box-shadow: 
-    0 0 20px rgba(0, 255, 65, 0.4),
-    inset 0 0 20px rgba(0, 255, 65, 0.1);
+    0 0 20px rgba(34, 139, 34, 0.4),
+    inset 0 0 20px rgba(34, 139, 34, 0.1);
 }
 
-/* Hover effects for interactive elements */
-.retro-game-container button:active {
-  transform: translateY(-1px) scale(0.98);
+/* Button states and interactions */
+.retro-button:focus {
+  outline: 2px solid #228B22;
+  outline-offset: 4px;
 }
 
-/* Gradient background animation */
+/* Platformer-style background animation */
+@keyframes cloudFloat {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(100vw); }
+}
+
+.bg-gradient-to-b {
+  background: linear-gradient(135deg, #87CEEB, #98FB98, #87CEEB);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-.bg-gradient-to-b {
-  background: linear-gradient(135deg, #0a4d0a, #0d5d0d, #0a4d0a);
-  background-size: 200% 200%;
-  animation: gradientShift 20s ease infinite;
-}
-
 /* Text selection styling */
 ::selection {
-  background: rgba(0, 255, 65, 0.3);
-  color: #00FF41;
-}
-
-/* Focus states */
-button:focus {
-  outline: 2px solid #00FF41;
-  outline-offset: 4px;
+  background: rgba(34, 139, 34, 0.3);
+  color: #2E8B57;
 }
 
 /* Loading and transition effects */
@@ -180,21 +169,53 @@ button:focus {
   transition: all 0.3s ease;
 }
 
-/* Enhanced particle effects */
-.particle-effect {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 50%;
-  animation: particle-float 2s ease-out forwards;
+/* Game UI styling */
+.game-ui {
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
 }
 
-@keyframes particle-float {
-  0% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.5) translateY(-50px);
-  }
+/* Platform game specific effects */
+.platform-shadow {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Coin collection animation */
+@keyframes coinSpin {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.coin-spin {
+  animation: coinSpin 2s linear infinite;
+}
+
+/* Jump effect for buttons */
+.jump-effect:hover {
+  animation: buttonJump 0.3s ease;
+}
+
+@keyframes buttonJump {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+/* Mario-style pipe green color scheme */
+.mario-green {
+  color: #228B22;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Power-up glow effect */
+.power-up-glow {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  animation: powerUpPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes powerUpPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); }
 }

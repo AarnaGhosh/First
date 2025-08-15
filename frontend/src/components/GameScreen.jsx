@@ -5,170 +5,428 @@ import { Play, Pause, RotateCcw, Trophy, Heart, Zap } from 'lucide-react';
 
 const GameScreen = () => {
   const canvasRef = useRef(null);
-  const [gameState, setGameState] = useState('menu'); // menu, playing, paused, gameOver
+  const [gameState, setGameState] = useState('menu'); // menu, playing, paused, gameOver, levelComplete
   const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [level, setLevel] = useState(1);
   const [highScore, setHighScore] = useState(0);
-  const [speed, setSpeed] = useState(150);
-  
-  // Snake game state
-  const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
-  const [food, setFood] = useState({ x: 15, y: 15 });
-  const [direction, setDirection] = useState({ x: 0, y: 0 });
   const [gameMessage, setGameMessage] = useState('');
+  
+  // Player state
+  const [player, setPlayer] = useState({
+    x: 100,
+    y: 300,
+    width: 32,
+    height: 32,
+    vx: 0,
+    vy: 0,
+    onGround: false,
+    direction: 1, // 1 for right, -1 for left
+    canJump: true
+  });
+  
+  // Game objects
+  const [camera, setCamera] = useState({ x: 0, y: 0 });
+  const [platforms, setPlatforms] = useState([]);
+  const [coins, setCoins] = useState([]);
+  const [enemies, setEnemies] = useState([]);
   const [particles, setParticles] = useState([]);
+  const [powerUps, setPowerUps] = useState([]);
   
   const gameLoop = useRef(null);
-  const lastRenderTime = useRef(0);
+  const keys = useRef({ a: false, d: false, w: false, s: false, space: false });
   
-  const GRID_SIZE = 20;
-  const GRID_WIDTH = 30;
-  const GRID_HEIGHT = 25;
+  const GRAVITY = 0.5;
+  const JUMP_FORCE = -12;
+  const MOVE_SPEED = 4;
+  const CANVAS_WIDTH = 800;
+  const CANVAS_HEIGHT = 400;
 
-  // Birthday messages for scoring
+  // Birthday messages for collecting items
   const birthdayMessages = [
     "Happy Birthday Samarth! 🎂",
-    "Another goal for the birthday boy! ⚽",
-    "Keep collecting those footballs! 🏆",
-    "Birthday streak going strong! 🎉",
-    "Samarth the football collector! ⭐"
+    "Birthday boy collecting goals! ⚽",
+    "Another year, another level! 🏆",
+    "Keep jumping, birthday champion! 🎉",
+    "Samarth's birthday adventure! ⭐"
   ];
+
+  // Create level platforms and objects
+  const createLevel = useCallback((levelNum) => {
+    const newPlatforms = [
+      // Ground platforms
+      { x: 0, y: 350, width: 200, height: 50, type: 'ground' },
+      { x: 250, y: 350, width: 150, height: 50, type: 'ground' },
+      { x: 450, y: 350, width: 200, height: 50, type: 'ground' },
+      { x: 700, y: 350, width: 200, height: 50, type: 'ground' },
+      { x: 950, y: 350, width: 300, height: 50, type: 'ground' },
+      
+      // Floating platforms
+      { x: 300, y: 280, width: 100, height: 20, type: 'platform' },
+      { x: 500, y: 220, width: 100, height: 20, type: 'platform' },
+      { x: 750, y: 180, width: 120, height: 20, type: 'platform' },
+      { x: 1000, y: 250, width: 100, height: 20, type: 'platform' },
+      { x: 1200, y: 200, width: 150, height: 20, type: 'platform' },
+      
+      // Higher platforms for advanced gameplay
+      { x: 600, y: 120, width: 80, height: 20, type: 'platform' },
+      { x: 800, y: 80, width: 100, height: 20, type: 'platform' },
+      { x: 1100, y: 100, width: 120, height: 20, type: 'platform' }
+    ];
+
+    const newCoins = [
+      { x: 320, y: 240, width: 20, height: 20, collected: false, value: 100 },
+      { x: 520, y: 180, width: 20, height: 20, collected: false, value: 100 },
+      { x: 780, y: 140, width: 20, height: 20, collected: false, value: 100 },
+      { x: 1020, y: 210, width: 20, height: 20, collected: false, value: 100 },
+      { x: 1220, y: 160, width: 20, height: 20, collected: false, value: 100 },
+      { x: 620, y: 80, width: 20, height: 20, collected: false, value: 200 },
+      { x: 820, y: 40, width: 20, height: 20, collected: false, value: 200 },
+      { x: 1120, y: 60, width: 20, height: 20, collected: false, value: 200 }
+    ];
+
+    const newEnemies = [
+      { x: 300, y: 320, width: 24, height: 24, vx: -1, type: 'goomba', active: true },
+      { x: 600, y: 320, width: 24, height: 24, vx: 1, type: 'goomba', active: true },
+      { x: 900, y: 320, width: 24, height: 24, vx: -1, type: 'goomba', active: true },
+      { x: 1100, y: 320, width: 24, height: 24, vx: 1, type: 'goomba', active: true }
+    ];
+
+    const newPowerUps = [
+      { x: 400, y: 300, width: 24, height: 24, type: 'birthday_cake', collected: false },
+      { x: 1000, y: 200, width: 24, height: 24, type: 'football', collected: false }
+    ];
+
+    setPlatforms(newPlatforms);
+    setCoins(newCoins);
+    setEnemies(newEnemies);
+    setPowerUps(newPowerUps);
+  }, []);
 
   // Initialize game
   const initGame = useCallback(() => {
     setScore(0);
-    setSpeed(150);
-    setSnake([{ x: 10, y: 10 }]);
-    setFood({ x: 15, y: 15 });
-    setDirection({ x: 0, y: 0 });
+    setLives(3);
+    setLevel(1);
+    setPlayer({
+      x: 100,
+      y: 300,
+      width: 32,
+      height: 32,
+      vx: 0,
+      vy: 0,
+      onGround: false,
+      direction: 1,
+      canJump: true
+    });
+    setCamera({ x: 0, y: 0 });
     setGameMessage('');
     setParticles([]);
+    createLevel(1);
     setGameState('playing');
-  }, []);
-
-  // Generate random food position
-  const generateFood = useCallback((snakeBody) => {
-    let newFood;
-    do {
-      newFood = {
-        x: Math.floor(Math.random() * GRID_WIDTH),
-        y: Math.floor(Math.random() * GRID_HEIGHT)
-      };
-    } while (snakeBody.some(segment => segment.x === newFood.x && segment.y === newFood.y));
-    return newFood;
-  }, []);
+  }, [createLevel]);
 
   // Create particle effect
-  const createParticles = useCallback((x, y) => {
+  const createParticles = useCallback((x, y, color = '#FFB000', count = 6) => {
     const newParticles = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < count; i++) {
       newParticles.push({
-        x: x * GRID_SIZE + GRID_SIZE / 2,
-        y: y * GRID_SIZE + GRID_SIZE / 2,
-        vx: (Math.random() - 0.5) * 6,
-        vy: (Math.random() - 0.5) * 6,
-        life: 30,
-        color: Math.random() > 0.5 ? '#00FF41' : '#FFB000'
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: Math.random() * -6 - 2,
+        life: 40,
+        color: color,
+        size: Math.random() * 4 + 2
       });
     }
     setParticles(prev => [...prev, ...newParticles]);
+  }, []);
+
+  // Collision detection
+  const checkCollision = useCallback((rect1, rect2) => {
+    return rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y;
   }, []);
 
   // Update game logic
   const updateGame = useCallback(() => {
     if (gameState !== 'playing') return;
 
-    setSnake(prevSnake => {
-      const newSnake = [...prevSnake];
-      const head = { ...newSnake[0] };
+    setPlayer(prevPlayer => {
+      let newPlayer = { ...prevPlayer };
       
-      // Move head
-      head.x += direction.x;
-      head.y += direction.y;
-      
-      // Check wall collision
-      if (head.x < 0 || head.x >= GRID_WIDTH || head.y < 0 || head.y >= GRID_HEIGHT) {
-        setGameState('gameOver');
-        setHighScore(prev => Math.max(prev, score));
-        return prevSnake;
+      // Handle input
+      if (keys.current.a) {
+        newPlayer.vx = -MOVE_SPEED;
+        newPlayer.direction = -1;
+      } else if (keys.current.d) {
+        newPlayer.vx = MOVE_SPEED;
+        newPlayer.direction = 1;
+      } else {
+        newPlayer.vx *= 0.8; // Friction
       }
       
-      // Check self collision
-      if (newSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
-        setGameState('gameOver');
-        setHighScore(prev => Math.max(prev, score));
-        return prevSnake;
+      // Jumping
+      if ((keys.current.w || keys.current.space) && newPlayer.onGround && newPlayer.canJump) {
+        newPlayer.vy = JUMP_FORCE;
+        newPlayer.onGround = false;
+        newPlayer.canJump = false;
       }
       
-      newSnake.unshift(head);
+      // Apply gravity
+      newPlayer.vy += GRAVITY;
       
-      // Check food collision
-      if (head.x === food.x && head.y === food.y) {
-        // Snake grows, don't remove tail
-        setScore(prev => {
-          const newScore = prev + 10;
-          // Show birthday message every 50 points
-          if (newScore % 50 === 0) {
-            const randomMessage = birthdayMessages[Math.floor(Math.random() * birthdayMessages.length)];
-            setGameMessage(randomMessage);
-            setTimeout(() => setGameMessage(''), 2000);
+      // Move player
+      newPlayer.x += newPlayer.vx;
+      newPlayer.y += newPlayer.vy;
+      
+      // Reset onGround
+      newPlayer.onGround = false;
+      
+      // Platform collision
+      platforms.forEach(platform => {
+        if (checkCollision(newPlayer, platform)) {
+          // Landing on top
+          if (prevPlayer.y + prevPlayer.height <= platform.y && newPlayer.vy > 0) {
+            newPlayer.y = platform.y - newPlayer.height;
+            newPlayer.vy = 0;
+            newPlayer.onGround = true;
+            newPlayer.canJump = true;
           }
-          return newScore;
+          // Hitting from below
+          else if (prevPlayer.y >= platform.y + platform.height && newPlayer.vy < 0) {
+            newPlayer.y = platform.y + platform.height;
+            newPlayer.vy = 0;
+          }
+          // Side collisions
+          else if (newPlayer.vy === 0 || Math.abs(newPlayer.vy) < 2) {
+            if (prevPlayer.x + prevPlayer.width <= platform.x) {
+              newPlayer.x = platform.x - newPlayer.width;
+            } else if (prevPlayer.x >= platform.x + platform.width) {
+              newPlayer.x = platform.x + platform.width;
+            }
+          }
+        }
+      });
+      
+      // Boundary checks
+      if (newPlayer.y > CANVAS_HEIGHT) {
+        // Player fell off the world
+        setLives(prev => {
+          const newLives = prev - 1;
+          if (newLives <= 0) {
+            setGameState('gameOver');
+            setHighScore(prev => Math.max(prev, score));
+          } else {
+            // Respawn player
+            newPlayer.x = 100;
+            newPlayer.y = 300;
+            newPlayer.vx = 0;
+            newPlayer.vy = 0;
+          }
+          return newLives;
+        });
+      }
+      
+      if (newPlayer.x < 0) newPlayer.x = 0;
+      
+      return newPlayer;
+    });
+
+    // Update camera to follow player
+    setCamera(prevCamera => {
+      const targetX = Math.max(0, player.x - CANVAS_WIDTH / 2);
+      return {
+        x: prevCamera.x + (targetX - prevCamera.x) * 0.1,
+        y: 0
+      };
+    });
+
+    // Update enemies
+    setEnemies(prevEnemies => {
+      return prevEnemies.map(enemy => {
+        if (!enemy.active) return enemy;
+        
+        let newEnemy = { ...enemy };
+        newEnemy.x += newEnemy.vx;
+        
+        // Simple AI - change direction at platform edges
+        let onPlatform = false;
+        platforms.forEach(platform => {
+          if (newEnemy.y + newEnemy.height >= platform.y && 
+              newEnemy.y + newEnemy.height <= platform.y + platform.height &&
+              newEnemy.x + newEnemy.width > platform.x && 
+              newEnemy.x < platform.x + platform.width) {
+            onPlatform = true;
+            
+            // Change direction at edges
+            if (newEnemy.x <= platform.x || newEnemy.x + newEnemy.width >= platform.x + platform.width) {
+              newEnemy.vx *= -1;
+            }
+          }
         });
         
-        // Create particle effect
-        createParticles(food.x, food.y);
+        // Check collision with player
+        if (checkCollision(player, newEnemy)) {
+          // Player jumped on enemy
+          if (player.y + player.height - 10 < newEnemy.y && player.vy > 0) {
+            newEnemy.active = false;
+            setScore(prev => prev + 200);
+            createParticles(newEnemy.x + newEnemy.width/2, newEnemy.y + newEnemy.height/2, '#FF4444');
+            setPlayer(prevPlayer => ({ ...prevPlayer, vy: JUMP_FORCE * 0.5 }));
+          } else {
+            // Player hit enemy - lose life
+            setLives(prev => {
+              const newLives = prev - 1;
+              if (newLives <= 0) {
+                setGameState('gameOver');
+                setHighScore(prev => Math.max(prev, score));
+              }
+              return newLives;
+            });
+            // Knockback player
+            setPlayer(prevPlayer => ({ 
+              ...prevPlayer, 
+              vx: newEnemy.x < prevPlayer.x ? 3 : -3,
+              vy: -5
+            }));
+          }
+        }
         
-        // Generate new food
-        setFood(generateFood(newSnake));
-        
-        // Increase speed slightly
-        setSpeed(prev => Math.max(80, prev - 2));
-      } else {
-        // Remove tail if no food eaten
-        newSnake.pop();
-      }
-      
-      return newSnake;
+        return newEnemy;
+      });
     });
-  }, [gameState, direction, food, score, generateFood, createParticles, birthdayMessages]);
+
+    // Check coin collection
+    setCoins(prevCoins => {
+      return prevCoins.map(coin => {
+        if (coin.collected) return coin;
+        
+        if (checkCollision(player, coin)) {
+          setScore(prev => {
+            const newScore = prev + coin.value;
+            // Show birthday message every 500 points
+            if (Math.floor(newScore / 500) > Math.floor(prev / 500)) {
+              const randomMessage = birthdayMessages[Math.floor(Math.random() * birthdayMessages.length)];
+              setGameMessage(randomMessage);
+              setTimeout(() => setGameMessage(''), 2000);
+            }
+            return newScore;
+          });
+          
+          createParticles(coin.x + coin.width/2, coin.y + coin.height/2, '#FFB000');
+          return { ...coin, collected: true };
+        }
+        return coin;
+      });
+    });
+
+    // Check power-up collection
+    setPowerUps(prevPowerUps => {
+      return prevPowerUps.map(powerUp => {
+        if (powerUp.collected) return powerUp;
+        
+        if (checkCollision(player, powerUp)) {
+          if (powerUp.type === 'birthday_cake') {
+            setScore(prev => prev + 500);
+            setGameMessage("Happy Birthday Bonus! 🎂");
+            setTimeout(() => setGameMessage(''), 2000);
+          } else if (powerUp.type === 'football') {
+            setScore(prev => prev + 300);
+            setGameMessage("Goal! ⚽");
+            setTimeout(() => setGameMessage(''), 1500);
+          }
+          
+          createParticles(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2, '#00FF41', 10);
+          return { ...powerUp, collected: true };
+        }
+        return powerUp;
+      });
+    });
+
+    // Update particles
+    setParticles(prev => prev.map(p => ({
+      ...p,
+      x: p.x + p.vx,
+      y: p.y + p.vy,
+      vy: p.vy + 0.2,
+      life: p.life - 1
+    })).filter(p => p.life > 0));
+
+    // Check level completion
+    const allCoinsCollected = coins.every(coin => coin.collected);
+    const allPowerUpsCollected = powerUps.every(powerUp => powerUp.collected);
+    
+    if (allCoinsCollected && allPowerUpsCollected && player.x > 1300) {
+      setGameState('levelComplete');
+      setLevel(prev => prev + 1);
+    }
+
+  }, [gameState, player, platforms, coins, enemies, powerUps, score, checkCollision, createParticles, birthdayMessages]);
 
   // Handle keyboard input
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (gameState !== 'playing') return;
-      
+    const handleKeyDown = (e) => {
       switch(e.key.toLowerCase()) {
-        case 'arrowup':
-        case 'w':
-          if (direction.y === 0) setDirection({ x: 0, y: -1 });
-          e.preventDefault();
-          break;
-        case 'arrowdown':
-        case 's':
-          if (direction.y === 0) setDirection({ x: 0, y: 1 });
-          e.preventDefault();
-          break;
-        case 'arrowleft':
         case 'a':
-          if (direction.x === 0) setDirection({ x: -1, y: 0 });
+          keys.current.a = true;
           e.preventDefault();
           break;
-        case 'arrowright':
         case 'd':
-          if (direction.x === 0) setDirection({ x: 1, y: 0 });
+          keys.current.d = true;
+          e.preventDefault();
+          break;
+        case 'w':
+          keys.current.w = true;
+          e.preventDefault();
+          break;
+        case 's':
+          keys.current.s = true;
+          e.preventDefault();
+          break;
+        case ' ':
+          keys.current.space = true;
           e.preventDefault();
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [gameState, direction]);
+    const handleKeyUp = (e) => {
+      switch(e.key.toLowerCase()) {
+        case 'a':
+          keys.current.a = false;
+          break;
+        case 'd':
+          keys.current.d = false;
+          break;
+        case 'w':
+          keys.current.w = false;
+          break;
+        case 's':
+          keys.current.s = false;
+          break;
+        case ' ':
+          keys.current.space = false;
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // Game loop
   useEffect(() => {
     if (gameState === 'playing') {
-      gameLoop.current = setInterval(updateGame, speed);
+      gameLoop.current = setInterval(updateGame, 1000/60);
     } else {
       if (gameLoop.current) {
         clearInterval(gameLoop.current);
@@ -180,24 +438,7 @@ const GameScreen = () => {
         clearInterval(gameLoop.current);
       }
     };
-  }, [gameState, updateGame, speed]);
-
-  // Update particles
-  useEffect(() => {
-    if (particles.length > 0) {
-      const particleInterval = setInterval(() => {
-        setParticles(prev => prev.map(p => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          vy: p.vy + 0.1, // gravity
-          life: p.life - 1
-        })).filter(p => p.life > 0));
-      }, 16);
-
-      return () => clearInterval(particleInterval);
-    }
-  }, [particles.length]);
+  }, [gameState, updateGame]);
 
   // Render game
   const render = useCallback(() => {
@@ -206,42 +447,41 @@ const GameScreen = () => {
 
     const ctx = canvas.getContext('2d');
     
-    // Clear canvas
-    ctx.fillStyle = '#0a4d0a';
+    // Clear canvas with sky blue background
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#87CEEB');
+    gradient.addColorStop(1, '#98FB98');
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (gameState === 'menu') {
       // Menu screen
-      ctx.fillStyle = '#00FF41';
-      ctx.font = 'bold 42px Orbitron, monospace';
+      ctx.fillStyle = '#2E8B57';
+      ctx.font = 'bold 36px Orbitron, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('HAPPY BIRTHDAY', canvas.width/2, 120);
-      ctx.fillText('SAMARTH!', canvas.width/2, 170);
+      ctx.fillText('HAPPY BIRTHDAY', canvas.width/2, 100);
+      ctx.fillText('SAMARTH!', canvas.width/2, 145);
       
-      ctx.font = 'bold 28px Orbitron, monospace';
-      ctx.fillStyle = '#FFB000';
-      ctx.fillText('FOOTBALL SNAKE', canvas.width/2, 220);
+      ctx.font = 'bold 24px Orbitron, monospace';
+      ctx.fillStyle = '#FF6347';
+      ctx.fillText('SUPER BIRTHDAY WORLD', canvas.width/2, 185);
       
-      ctx.font = '18px Orbitron, monospace';
-      ctx.fillStyle = '#00FF41';
-      ctx.fillText('Collect footballs to grow longer!', canvas.width/2, 260);
-      ctx.fillText('Use arrow keys or WASD to move', canvas.width/2, 285);
-      ctx.fillText('Don\'t hit the walls or yourself!', canvas.width/2, 310);
+      ctx.font = '16px Orbitron, monospace';
+      ctx.fillStyle = '#2E8B57';
+      ctx.fillText('A = Move Left, D = Move Right', canvas.width/2, 220);
+      ctx.fillText('W = Jump (or Spacebar)', canvas.width/2, 245);
+      ctx.fillText('Collect all footballs and reach the end!', canvas.width/2, 270);
       
-      ctx.font = 'bold 20px Orbitron, monospace';
-      ctx.fillStyle = '#FFB000';
-      ctx.fillText(`HIGH SCORE: ${highScore}`, canvas.width/2, 370);
+      ctx.font = 'bold 18px Orbitron, monospace';
+      ctx.fillStyle = '#FF6347';
+      ctx.fillText(`HIGH SCORE: ${highScore}`, canvas.width/2, 320);
       
-      // Draw sample snake and football
-      ctx.fillStyle = '#00FF41';
-      ctx.fillRect(canvas.width/2 - 60, 400, GRID_SIZE, GRID_SIZE);
-      ctx.fillRect(canvas.width/2 - 40, 400, GRID_SIZE, GRID_SIZE);
-      ctx.fillRect(canvas.width/2 - 20, 400, GRID_SIZE, GRID_SIZE);
-      
-      ctx.fillStyle = '#FFB000';
-      ctx.beginPath();
-      ctx.arc(canvas.width/2 + 20, 410, 10, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw sample character
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(canvas.width/2 - 16, 340, 32, 32);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(canvas.width/2 - 12, 345, 8, 8);
+      ctx.fillRect(canvas.width/2 + 4, 345, 8, 8);
       
       return;
     }
@@ -249,109 +489,158 @@ const GameScreen = () => {
     if (gameState === 'gameOver') {
       // Game over screen
       ctx.fillStyle = '#FF4444';
-      ctx.font = 'bold 42px Orbitron, monospace';
+      ctx.font = 'bold 36px Orbitron, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', canvas.width/2, 200);
+      ctx.fillText('GAME OVER', canvas.width/2, 150);
       
-      ctx.fillStyle = '#00FF41';
+      ctx.fillStyle = '#2E8B57';
+      ctx.font = '20px Orbitron, monospace';
+      ctx.fillText(`Final Score: ${score}`, canvas.width/2, 190);
+      ctx.fillText(`Level Reached: ${level}`, canvas.width/2, 220);
+      
+      ctx.fillStyle = '#FF6347';
       ctx.font = '22px Orbitron, monospace';
-      ctx.fillText(`Final Score: ${score}`, canvas.width/2, 240);
-      ctx.fillText(`Snake Length: ${snake.length}`, canvas.width/2, 270);
-      
-      ctx.fillStyle = '#FFB000';
-      ctx.font = '24px Orbitron, monospace';
-      ctx.fillText('Happy Birthday Samarth! 🎂⚽', canvas.width/2, 310);
+      ctx.fillText('Happy Birthday Samarth! 🎂⚽', canvas.width/2, 260);
       
       if (score > highScore) {
         ctx.fillStyle = '#FFB000';
-        ctx.font = 'bold 20px Orbitron, monospace';
-        ctx.fillText('NEW HIGH SCORE! 🏆', canvas.width/2, 340);
+        ctx.font = 'bold 18px Orbitron, monospace';
+        ctx.fillText('NEW HIGH SCORE! 🏆', canvas.width/2, 290);
       }
       
       return;
     }
 
-    // Draw football field pattern
-    ctx.strokeStyle = '#0d5d0d';
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= GRID_WIDTH; x++) {
-      ctx.beginPath();
-      ctx.moveTo(x * GRID_SIZE, 0);
-      ctx.lineTo(x * GRID_SIZE, canvas.height);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= GRID_HEIGHT; y++) {
-      ctx.beginPath();
-      ctx.moveTo(0, y * GRID_SIZE);
-      ctx.lineTo(canvas.width, y * GRID_SIZE);
-      ctx.stroke();
+    if (gameState === 'levelComplete') {
+      // Level complete screen
+      ctx.fillStyle = '#00FF41';
+      ctx.font = 'bold 36px Orbitron, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('LEVEL COMPLETE!', canvas.width/2, 150);
+      
+      ctx.fillStyle = '#FF6347';
+      ctx.font = '20px Orbitron, monospace';
+      ctx.fillText(`Score: ${score}`, canvas.width/2, 190);
+      ctx.fillText('Another birthday level conquered!', canvas.width/2, 220);
+      
+      return;
     }
 
-    // Draw center circle
-    ctx.strokeStyle = '#0d5d0d';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI * 2);
-    ctx.stroke();
+    // Game playing - apply camera transform
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
 
-    // Draw snake (Samarth)
-    snake.forEach((segment, index) => {
-      if (index === 0) {
-        // Head - brighter green
-        ctx.fillStyle = '#00FF41';
-        ctx.fillRect(segment.x * GRID_SIZE + 2, segment.y * GRID_SIZE + 2, GRID_SIZE - 4, GRID_SIZE - 4);
-        
-        // Eyes
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(segment.x * GRID_SIZE + 6, segment.y * GRID_SIZE + 6, 3, 3);
-        ctx.fillRect(segment.x * GRID_SIZE + 11, segment.y * GRID_SIZE + 6, 3, 3);
+    // Draw platforms
+    platforms.forEach(platform => {
+      if (platform.type === 'ground') {
+        ctx.fillStyle = '#8B4513';
       } else {
-        // Body - darker green
-        ctx.fillStyle = '#00CC33';
-        ctx.fillRect(segment.x * GRID_SIZE + 3, segment.y * GRID_SIZE + 3, GRID_SIZE - 6, GRID_SIZE - 6);
+        ctx.fillStyle = '#32CD32';
+      }
+      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+      
+      // Add texture
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(platform.x, platform.y, platform.width, 4);
+    });
+
+    // Draw coins (footballs)
+    coins.forEach(coin => {
+      if (!coin.collected) {
+        ctx.fillStyle = '#FFB000';
+        ctx.beginPath();
+        ctx.arc(coin.x + coin.width/2, coin.y + coin.height/2, coin.width/2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Football pattern
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(coin.x + 2, coin.y + coin.height/2);
+        ctx.lineTo(coin.x + coin.width - 2, coin.y + coin.height/2);
+        ctx.stroke();
       }
     });
 
-    // Draw food (football)
-    ctx.fillStyle = '#FFB000';
-    ctx.beginPath();
-    ctx.arc(food.x * GRID_SIZE + GRID_SIZE/2, food.y * GRID_SIZE + GRID_SIZE/2, 8, 0, Math.PI * 2);
-    ctx.fill();
+    // Draw power-ups
+    powerUps.forEach(powerUp => {
+      if (!powerUp.collected) {
+        if (powerUp.type === 'birthday_cake') {
+          ctx.fillStyle = '#FFB6C1';
+          ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+          ctx.fillStyle = '#FF1493';
+          ctx.fillRect(powerUp.x + 2, powerUp.y + 2, powerUp.width - 4, 4);
+        } else if (powerUp.type === 'football') {
+          ctx.fillStyle = '#8B4513';
+          ctx.beginPath();
+          ctx.ellipse(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2, 
+                     powerUp.width/2, powerUp.height/3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
+
+    // Draw enemies
+    enemies.forEach(enemy => {
+      if (enemy.active) {
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        // Eyes
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(enemy.x + 4, enemy.y + 4, 4, 4);
+        ctx.fillRect(enemy.x + 16, enemy.y + 4, 4, 4);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(enemy.x + 6, enemy.y + 6, 2, 2);
+        ctx.fillRect(enemy.x + 18, enemy.y + 6, 2, 2);
+      }
+    });
+
+    // Draw player (Samarth)
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
     
-    // Football pattern
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(food.x * GRID_SIZE + 4, food.y * GRID_SIZE + GRID_SIZE/2);
-    ctx.lineTo(food.x * GRID_SIZE + GRID_SIZE - 4, food.y * GRID_SIZE + GRID_SIZE/2);
-    ctx.stroke();
+    // Player details
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(player.x + 4, player.y + 4, 8, 8);
+    ctx.fillRect(player.x + 20, player.y + 4, 8, 8);
+    
+    // Direction indicator
+    if (player.direction > 0) {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(player.x + 24, player.y + 6, 4, 4);
+    } else {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(player.x + 4, player.y + 6, 4, 4);
+    }
 
     // Draw particles
     particles.forEach(particle => {
-      ctx.globalAlpha = particle.life / 30;
+      ctx.globalAlpha = particle.life / 40;
       ctx.fillStyle = particle.color;
-      ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+      ctx.fillRect(particle.x - particle.size/2, particle.y - particle.size/2, particle.size, particle.size);
     });
     ctx.globalAlpha = 1;
 
-    // Draw UI
-    ctx.fillStyle = '#00FF41';
-    ctx.font = 'bold 18px Orbitron, monospace';
+    ctx.restore();
+
+    // Draw UI (not affected by camera)
+    ctx.fillStyle = '#2E8B57';
+    ctx.font = 'bold 16px Orbitron, monospace';
     ctx.textAlign = 'left';
     ctx.fillText(`Score: ${score}`, 10, 25);
-    ctx.fillText(`Length: ${snake.length}`, 10, 50);
+    ctx.fillText(`Lives: ${lives}`, 10, 50);
+    ctx.fillText(`Level: ${level}`, 200, 25);
     ctx.textAlign = 'right';
-    ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 25);
-    ctx.fillText(`Samarth's Birthday Snake!`, canvas.width - 10, 50);
+    ctx.fillText(`Samarth's Birthday Adventure!`, canvas.width - 10, 25);
     
     // Show game message
     if (gameMessage) {
-      ctx.fillStyle = '#FFB000';
-      ctx.font = 'bold 20px Orbitron, monospace';
+      ctx.fillStyle = '#FF6347';
+      ctx.font = 'bold 18px Orbitron, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(gameMessage, canvas.width/2, 100);
+      ctx.fillText(gameMessage, canvas.width/2, 80);
     }
-  }, [gameState, snake, food, particles, score, highScore, gameMessage]);
+  }, [gameState, player, platforms, coins, enemies, powerUps, particles, camera, score, lives, level, highScore, gameMessage]);
 
   // Render on every frame
   useEffect(() => {
@@ -362,27 +651,35 @@ const GameScreen = () => {
     renderLoop();
   }, [render]);
 
+  // Continue to next level
+  const nextLevel = () => {
+    createLevel(level);
+    setPlayer(prev => ({ ...prev, x: 100, y: 300, vx: 0, vy: 0 }));
+    setCamera({ x: 0, y: 0 });
+    setGameState('playing');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-900 to-green-800 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-blue-400 to-green-400 flex flex-col items-center justify-center p-4">
       <div className="retro-game-container">
         <Card className="bg-gray-900 border-green-500 border-3 p-6 shadow-2xl">
           <div className="flex flex-col items-center space-y-4">
             <canvas
               ref={canvasRef}
-              width={GRID_WIDTH * GRID_SIZE}
-              height={GRID_HEIGHT * GRID_SIZE}
-              className="border-3 border-green-500 bg-green-800 shadow-lg"
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              className="border-3 border-green-500 bg-sky-200 shadow-lg"
               style={{ imageRendering: 'pixelated' }}
             />
             
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 flex-wrap justify-center">
               {gameState === 'menu' && (
                 <Button 
                   onClick={initGame}
                   className="bg-green-500 hover:bg-green-600 text-black font-bold retro-button pulse"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  START GAME
+                  START ADVENTURE
                 </Button>
               )}
               
@@ -406,7 +703,17 @@ const GameScreen = () => {
                 </Button>
               )}
               
-              {(gameState === 'gameOver' || gameState === 'paused') && (
+              {gameState === 'levelComplete' && (
+                <Button 
+                  onClick={nextLevel}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold retro-button"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  NEXT LEVEL
+                </Button>
+              )}
+              
+              {(gameState === 'gameOver' || gameState === 'paused' || gameState === 'levelComplete') && (
                 <Button 
                   onClick={() => setGameState('menu')}
                   className="bg-red-500 hover:bg-red-600 text-white font-bold retro-button"
@@ -420,21 +727,21 @@ const GameScreen = () => {
             {gameState === 'paused' && (
               <div className="text-green-500 text-center font-mono">
                 <h3 className="text-xl font-bold">GAME PAUSED</h3>
-                <p>Take a break, birthday boy!</p>
+                <p>Take a breath, birthday hero!</p>
               </div>
             )}
           </div>
         </Card>
         
         <div className="mt-6 text-center">
-          <h1 className="text-4xl font-bold text-green-400 font-mono mb-2 pulse">
+          <h1 className="text-4xl font-bold text-green-800 font-mono mb-2 pulse">
             <Trophy className="inline w-10 h-10 mr-3" />
             HAPPY BIRTHDAY SAMARTH!
             <Heart className="inline w-10 h-10 ml-3 text-red-500" />
           </h1>
-          <p className="text-green-300 font-mono text-lg">
+          <p className="text-green-700 font-mono text-lg">
             <Zap className="inline w-5 h-5 mr-1" />
-            A retro football snake game made with love ⚽🎂
+            A super Mario-style birthday adventure ⚽🎂
           </p>
         </div>
       </div>

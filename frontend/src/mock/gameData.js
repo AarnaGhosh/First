@@ -1,116 +1,123 @@
-// Mock data for the retro football snake game
+// Mock data for the Super Birthday World platformer game
 export const mockGameData = {
   playerName: "Samarth",
   birthdayMessages: [
     "Happy Birthday Samarth! 🎂⚽",
-    "Growing longer like your years of wisdom! 🐍",
-    "Another football collected, another year celebrated! 🏆",
-    "Keep slithering to success, birthday boy! 🎉",
-    "Snake champion on his special day! 🥇",
-    "Birthday goals achieved! ⚽🎂",
-    "Samarth the Snake Master! 🐍👑"
-  ],
-  footballFacts: [
-    "Fun fact: Snakes can't eat footballs in real life! 🐍⚽",
-    "The longest recorded snake was 32 feet - beat that score!",
-    "Football fields are perfect hunting grounds for birthday snakes!",
-    "Did you know? This snake only eats on birthdays! 🎂",
-    "Real snakes shed their skin, but this one just grows longer!"
-  ],
-  achievements: [
-    { id: 1, name: "First Bite", description: "Collected your first football!", icon: "⚽", unlocked: false, requirement: 1 },
-    { id: 2, name: "Growing Up", description: "Reached length of 10!", icon: "🐍", unlocked: false, requirement: 10 },
-    { id: 3, name: "Birthday Feast", description: "Scored 500 points!", icon: "🎂", unlocked: false, requirement: 500 },
-    { id: 4, name: "Snake Master", description: "Reached length of 25!", icon: "👑", unlocked: false, requirement: 25 },
-    { id: 5, name: "Legendary", description: "Scored 1000 points!", icon: "🏆", unlocked: false, requirement: 1000 },
-    { id: 6, name: "Speed Demon", description: "Survived at maximum speed!", icon: "⚡", unlocked: false, requirement: "max_speed" },
-    { id: 7, name: "Century Club", description: "Reached length of 100!", icon: "💯", unlocked: false, requirement: 100 }
-  ],
-  powerUps: [
-    { id: 1, name: "Birthday Boost", description: "Double points for 10 seconds!", color: "#FFB000", duration: 10000 },
-    { id: 2, name: "Slow Motion", description: "Slows down time!", color: "#00BFFF", duration: 5000 },
-    { id: 3, name: "Super Growth", description: "Grow 3 segments instead of 1!", color: "#FF69B4", duration: 15000 }
-  ],
-  highScores: [
-    { player: "Samarth", score: 0, length: 1, date: new Date().toISOString() }
+    "Another year of jumping to success! 🏆",
+    "Birthday boy conquering platforms! 🎉",
+    "Level up in life and in the game! ⭐",
+    "Super Samarth's birthday adventure! 👑",
+    "Keep jumping higher, birthday champion! 🚀",
+    "Football goals and birthday goals! ⚽🎂"
   ],
   gameStats: {
     totalGamesPlayed: 0,
-    totalFootballsEaten: 0,
-    longestSnake: 0,
+    totalCoinsCollected: 0,
+    totalEnemiesDefeated: 0,
+    highestLevelReached: 0,
+    totalJumps: 0,
     totalPlayTime: 0,
     averageScore: 0,
     achievementsUnlocked: 0
   },
+  achievements: [
+    { id: 1, name: "First Steps", description: "Started your first adventure!", icon: "👟", unlocked: false, requirement: "start_game" },
+    { id: 2, name: "Coin Collector", description: "Collected 10 coins!", icon: "⚽", unlocked: false, requirement: 10 },
+    { id: 3, name: "Enemy Stomper", description: "Defeated 5 enemies!", icon: "👾", unlocked: false, requirement: "enemies_5" },
+    { id: 4, name: "Birthday Bonus", description: "Found the birthday cake!", icon: "🎂", unlocked: false, requirement: "birthday_cake" },
+    { id: 5, name: "High Jumper", description: "Made 100 jumps!", icon: "🦘", unlocked: false, requirement: "jumps_100" },
+    { id: 6, name: "Level Master", description: "Completed 3 levels!", icon: "🏆", unlocked: false, requirement: "levels_3" },
+    { id: 7, name: "Score Champion", description: "Reached 5000 points!", icon: "⭐", unlocked: false, requirement: 5000 },
+    { id: 8, name: "Birthday Legend", description: "Reached 10000 points!", icon: "👑", unlocked: false, requirement: 10000 }
+  ],
+  powerUps: [
+    { id: 1, name: "Birthday Cake", description: "Big birthday bonus points!", effect: "500 points", color: "#FFB6C1" },
+    { id: 2, name: "Football", description: "Goal! Extra points!", effect: "300 points", color: "#8B4513" },
+    { id: 3, name: "Super Jump", description: "Jump higher for 10 seconds!", effect: "Enhanced jumping", color: "#00FF41" },
+    { id: 4, name: "Speed Boost", description: "Move faster temporarily!", effect: "Increased speed", color: "#FF6347" }
+  ],
+  levels: [
+    {
+      id: 1,
+      name: "Birthday Park",
+      theme: "grass",
+      difficulty: "easy",
+      coinsRequired: 8,
+      description: "Samarth's birthday celebration begins!"
+    },
+    {
+      id: 2,
+      name: "Football Stadium",
+      theme: "sports",
+      difficulty: "medium", 
+      coinsRequired: 12,
+      description: "Score goals and collect footballs!"
+    },
+    {
+      id: 3,
+      name: "Cake Castle",
+      theme: "birthday",
+      difficulty: "hard",
+      coinsRequired: 15,
+      description: "The ultimate birthday adventure!"
+    }
+  ],
+  highScores: [
+    { player: "Samarth", score: 0, level: 1, date: new Date().toISOString() }
+  ],
   settings: {
     soundEnabled: true,
-    difficulty: "normal", // easy, normal, hard, insane
-    snakeColor: "#00FF41",
-    footballColor: "#FFB000",
-    fieldColor: "#0a4d0a",
-    particleEffects: true
-  },
-  leaderboard: [
-    { rank: 1, player: "Samarth", score: 0, length: 1, date: "Today" }
-  ]
+    difficulty: "normal",
+    controls: "wasd", // wasd or arrows
+    playerColor: "#FF0000",
+    particleEffects: true,
+    showFPS: false
+  }
 };
 
-// Enhanced mock API functions
+// Enhanced mock API functions for platformer game
 export const mockApi = {
-  // Save game score and statistics
-  saveGameResult: async (playerName, score, snakeLength, duration) => {
+  // Save game completion data
+  saveGameSession: async (playerName, score, level, stats) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log(`🎮 Game completed - Player: ${playerName}, Score: ${score}, Length: ${snakeLength}, Duration: ${duration}s`);
+        console.log(`🎮 Game session saved - Player: ${playerName}, Score: ${score}, Level: ${level}`);
         
-        // Update stats
+        // Update statistics
         mockGameData.gameStats.totalGamesPlayed++;
-        mockGameData.gameStats.totalFootballsEaten += Math.floor(score / 10);
-        mockGameData.gameStats.longestSnake = Math.max(mockGameData.gameStats.longestSnake, snakeLength);
-        mockGameData.gameStats.totalPlayTime += duration;
-        mockGameData.gameStats.averageScore = mockGameData.gameStats.totalGamesPlayed > 0 
-          ? Math.round((mockGameData.gameStats.averageScore + score) / 2) 
-          : score;
+        mockGameData.gameStats.totalCoinsCollected += stats.coinsCollected || 0;
+        mockGameData.gameStats.totalEnemiesDefeated += stats.enemiesDefeated || 0;
+        mockGameData.gameStats.highestLevelReached = Math.max(mockGameData.gameStats.highestLevelReached, level);
+        mockGameData.gameStats.totalJumps += stats.jumps || 0;
+        mockGameData.gameStats.totalPlayTime += stats.playTime || 0;
         
-        // Add to high scores
-        if (score > 0) {
-          mockGameData.highScores.push({
-            player: playerName,
-            score: score,
-            length: snakeLength,
-            date: new Date().toISOString()
-          });
-          
-          // Keep only top 10 scores
-          mockGameData.highScores.sort((a, b) => b.score - a.score);
-          mockGameData.highScores = mockGameData.highScores.slice(0, 10);
+        // Calculate average score
+        if (mockGameData.gameStats.totalGamesPlayed > 0) {
+          mockGameData.gameStats.averageScore = Math.round(
+            (mockGameData.gameStats.averageScore * (mockGameData.gameStats.totalGamesPlayed - 1) + score) / 
+            mockGameData.gameStats.totalGamesPlayed
+          );
         }
         
-        resolve({ success: true, message: "Game result saved! 🏆" });
-      }, 600);
-    });
-  },
-
-  // Get leaderboard
-  getLeaderboard: async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const leaderboard = mockGameData.highScores.map((score, index) => ({
-          rank: index + 1,
-          ...score,
-          date: new Date(score.date).toLocaleDateString()
-        }));
-        
-        resolve({
-          success: true,
-          data: leaderboard
+        // Add to high scores
+        mockGameData.highScores.push({
+          player: playerName,
+          score: score,
+          level: level,
+          date: new Date().toISOString()
         });
-      }, 300);
+        
+        // Keep only top 10 scores
+        mockGameData.highScores.sort((a, b) => b.score - a.score);
+        mockGameData.highScores = mockGameData.highScores.slice(0, 10);
+        
+        resolve({ success: true, message: "Game session saved! 🏆" });
+      }, 500);
     });
   },
 
   // Check and unlock achievements
-  checkAchievements: async (score, snakeLength, gameStats) => {
+  checkAchievements: async (gameStats) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const newAchievements = [];
@@ -120,26 +127,29 @@ export const mockApi = {
             let shouldUnlock = false;
             
             switch(achievement.requirement) {
-              case 1:
-                shouldUnlock = score >= 10; // First football
+              case "start_game":
+                shouldUnlock = true;
                 break;
               case 10:
-                shouldUnlock = snakeLength >= 10;
+                shouldUnlock = gameStats.coinsCollected >= 10;
                 break;
-              case 25:
-                shouldUnlock = snakeLength >= 25;
+              case "enemies_5":
+                shouldUnlock = gameStats.enemiesDefeated >= 5;
                 break;
-              case 100:
-                shouldUnlock = snakeLength >= 100;
+              case "birthday_cake":
+                shouldUnlock = gameStats.foundBirthdayCake;
                 break;
-              case 500:
-                shouldUnlock = score >= 500;
+              case "jumps_100":
+                shouldUnlock = gameStats.totalJumps >= 100;
                 break;
-              case 1000:
-                shouldUnlock = score >= 1000;
+              case "levels_3":
+                shouldUnlock = gameStats.levelsCompleted >= 3;
                 break;
-              case "max_speed":
-                shouldUnlock = score >= 200; // Survived long enough at high speed
+              case 5000:
+                shouldUnlock = gameStats.score >= 5000;
+                break;
+              case 10000:
+                shouldUnlock = gameStats.score >= 10000;
                 break;
             }
             
@@ -157,7 +167,25 @@ export const mockApi = {
           newAchievements: newAchievements,
           totalUnlocked: mockGameData.gameStats.achievementsUnlocked
         });
-      }, 400);
+      }, 300);
+    });
+  },
+
+  // Get leaderboard
+  getLeaderboard: async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const leaderboard = mockGameData.highScores.map((score, index) => ({
+          rank: index + 1,
+          ...score,
+          date: new Date(score.date).toLocaleDateString()
+        }));
+        
+        resolve({
+          success: true,
+          data: leaderboard
+        });
+      }, 250);
     });
   },
 
@@ -170,22 +198,23 @@ export const mockApi = {
           data: {
             ...mockGameData.gameStats,
             achievements: mockGameData.achievements.filter(a => a.unlocked),
-            totalAchievements: mockGameData.achievements.length
+            totalAchievements: mockGameData.achievements.length,
+            completionRate: Math.round((mockGameData.gameStats.achievementsUnlocked / mockGameData.achievements.length) * 100)
           }
         });
-      }, 250);
+      }, 200);
     });
   },
 
-  // Get random motivational message
+  // Get random birthday motivation
   getBirthdayMotivation: async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const messages = [
           ...mockGameData.birthdayMessages,
-          "Keep growing, Samarth! 🐍✨",
-          "Another year older, another level completed! 🎮",
-          "Birthday snake skills are unmatched! 🏆"
+          "Keep jumping to new heights, Samarth! 🚀",
+          "Every platform conquered, every year celebrated! 🎈",
+          "Super Birthday World champion! 🏆⚽"
         ];
         
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
@@ -193,22 +222,20 @@ export const mockApi = {
           success: true,
           message: randomMessage
         });
-      }, 200);
+      }, 150);
     });
   },
 
-  // Get random football/snake fact
-  getGameFact: async () => {
+  // Get level information
+  getLevelInfo: async (levelId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const randomFact = mockGameData.footballFacts[
-          Math.floor(Math.random() * mockGameData.footballFacts.length)
-        ];
+        const level = mockGameData.levels.find(l => l.id === levelId) || mockGameData.levels[0];
         resolve({
           success: true,
-          fact: randomFact
+          data: level
         });
-      }, 200);
+      }, 100);
     });
   },
 
@@ -219,7 +246,20 @@ export const mockApi = {
         mockGameData.settings = { ...mockGameData.settings, ...settings };
         console.log("Settings saved:", settings);
         resolve({ success: true, message: "Settings saved!" });
-      }, 300);
+      }, 200);
+    });
+  },
+
+  // Get power-up information
+  getPowerUpInfo: async (powerUpType) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const powerUp = mockGameData.powerUps.find(p => p.name.toLowerCase().includes(powerUpType.toLowerCase()));
+        resolve({
+          success: true,
+          data: powerUp || { name: "Mystery Power-Up", description: "Special birthday surprise!", effect: "Unknown" }
+        });
+      }, 100);
     });
   }
 };
