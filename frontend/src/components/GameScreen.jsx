@@ -137,20 +137,24 @@ const GameScreen = () => {
     const handleKeyPress = (e) => {
       if (gameState !== 'playing') return;
       
-      switch(e.key) {
-        case 'ArrowUp':
+      switch(e.key.toLowerCase()) {
+        case 'arrowup':
+        case 'w':
           if (direction.y === 0) setDirection({ x: 0, y: -1 });
           e.preventDefault();
           break;
-        case 'ArrowDown':
+        case 'arrowdown':
+        case 's':
           if (direction.y === 0) setDirection({ x: 0, y: 1 });
           e.preventDefault();
           break;
-        case 'ArrowLeft':
+        case 'arrowleft':
+        case 'a':
           if (direction.x === 0) setDirection({ x: -1, y: 0 });
           e.preventDefault();
           break;
-        case 'ArrowRight':
+        case 'arrowright':
+        case 'd':
           if (direction.x === 0) setDirection({ x: 1, y: 0 });
           e.preventDefault();
           break;
