@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+
 .App {
-  background-color: #000000;
+  background: linear-gradient(135deg, #0a4d0a 0%, #0d5d0d 50%, #0a4d0a 100%);
   min-height: 100vh;
+  font-family: 'Orbitron', 'Space Mono', monospace;
 }
 
 .retro-game-container {
@@ -10,21 +13,54 @@
 }
 
 .retro-button {
-  font-family: 'Courier New', monospace;
+  font-family: 'Orbitron', 'Space Mono', monospace !important;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  border: 2px solid;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+  letter-spacing: 3px;
+  border: 3px solid;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 65, 0.4),
+    inset 0 0 10px rgba(0, 255, 65, 0.1);
+  background: linear-gradient(145deg, transparent, rgba(0, 255, 65, 0.1));
 }
 
 .retro-button:hover {
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
-  transform: translateY(-2px);
+  box-shadow: 
+    0 0 25px rgba(0, 255, 65, 0.7),
+    inset 0 0 15px rgba(0, 255, 65, 0.2);
+  transform: translateY(-3px) scale(1.05);
 }
 
-/* Retro scanlines effect */
-canvas::after {
+/* Pulse animation for emphasis */
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    text-shadow: 0 0 20px currentColor;
+  }
+  50% { 
+    opacity: 0.8; 
+    text-shadow: 0 0 30px currentColor;
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Retro glow effects */
+.retro-game-container h1 {
+  text-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 30px currentColor;
+}
+
+.retro-game-container p {
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* Scanlines effect for retro feel */
+canvas::before {
   content: '';
   position: absolute;
   top: 0;
@@ -32,84 +68,133 @@ canvas::after {
   right: 0;
   bottom: 0;
   background: linear-gradient(
-    transparent 50%, 
-    rgba(0, 255, 65, 0.05) 50%
+    transparent 48%, 
+    rgba(0, 255, 65, 0.03) 49%,
+    rgba(0, 255, 65, 0.03) 51%,
+    transparent 52%
   );
   background-size: 100% 4px;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Retro glow effects */
-.retro-game-container h1 {
-  text-shadow: 0 0 10px currentColor;
-}
-
-.retro-game-container p {
-  text-shadow: 0 0 5px currentColor;
-}
-
-/* Custom scrollbar for retro feel */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: #0a4d0a;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00FF41;
-  border-radius: 4px;
+  background: linear-gradient(45deg, #00FF41, #00CC33);
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00CC33;
+  background: linear-gradient(45deg, #00CC33, #00FF41);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
 }
 
-/* Retro font loading */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-
+/* Body styling */
 body {
-  font-family: 'Orbitron', 'Courier New', monospace !important;
-  background-color: #000;
+  font-family: 'Orbitron', 'Space Mono', monospace !important;
+  background: linear-gradient(135deg, #0a4d0a 0%, #0d5d0d 50%, #0a4d0a 100%);
   color: #00FF41;
+  margin: 0;
+  overflow-x: hidden;
 }
 
-/* Animation for game elements */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.pulse {
-  animation: pulse 2s infinite;
-}
-
-/* Retro card styling */
+/* Enhanced card styling */
 .bg-gray-900 {
-  background: linear-gradient(145deg, #1a1a1a, #0f0f0f) !important;
+  background: linear-gradient(145deg, #1a3d1a, #0f2f0f) !important;
   box-shadow: 
-    inset 0 0 20px rgba(0, 255, 65, 0.1),
-    0 0 30px rgba(0, 255, 65, 0.2) !important;
+    inset 0 0 30px rgba(0, 255, 65, 0.1),
+    0 0 40px rgba(0, 255, 65, 0.2),
+    0 15px 35px rgba(0, 0, 0, 0.5) !important;
+  border: 3px solid #00FF41 !important;
 }
 
-/* Game screen effects */
+/* Game canvas effects */
 canvas {
-  filter: contrast(1.1) brightness(1.05);
-  border-radius: 8px;
+  filter: contrast(1.15) brightness(1.1) saturate(1.2);
+  border-radius: 10px;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 255, 65, 0.3);
 }
 
-/* Retro text styling */
+/* Font styling */
 .font-mono {
-  font-family: 'Orbitron', 'Courier New', monospace !important;
-  letter-spacing: 1px;
+  font-family: 'Orbitron', 'Space Mono', monospace !important;
+  letter-spacing: 2px;
 }
 
-/* Birthday theme colors */
+/* Birthday theme enhancements */
 .text-red-500 {
-  filter: drop-shadow(0 0 5px currentColor);
+  filter: drop-shadow(0 0 8px currentColor);
+  animation: pulse 3s infinite;
 }
 
 .border-green-500 {
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 65, 0.4),
+    inset 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+/* Hover effects for interactive elements */
+.retro-game-container button:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* Gradient background animation */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-gradient-to-b {
+  background: linear-gradient(135deg, #0a4d0a, #0d5d0d, #0a4d0a);
+  background-size: 200% 200%;
+  animation: gradientShift 20s ease infinite;
+}
+
+/* Text selection styling */
+::selection {
+  background: rgba(0, 255, 65, 0.3);
+  color: #00FF41;
+}
+
+/* Focus states */
+button:focus {
+  outline: 2px solid #00FF41;
+  outline-offset: 4px;
+}
+
+/* Loading and transition effects */
+.retro-game-container * {
+  transition: all 0.3s ease;
+}
+
+/* Enhanced particle effects */
+.particle-effect {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  animation: particle-float 2s ease-out forwards;
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-50px);
+  }
 }
