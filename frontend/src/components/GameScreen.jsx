@@ -225,7 +225,7 @@ const GameScreen = () => {
       ctx.font = '18px Orbitron, monospace';
       ctx.fillStyle = '#00FF41';
       ctx.fillText('Collect footballs to grow longer!', canvas.width/2, 260);
-      ctx.fillText('Use arrow keys to move', canvas.width/2, 285);
+      ctx.fillText('Use arrow keys or WASD to move', canvas.width/2, 285);
       ctx.fillText('Don\'t hit the walls or yourself!', canvas.width/2, 310);
       
       ctx.font = 'bold 20px Orbitron, monospace';
