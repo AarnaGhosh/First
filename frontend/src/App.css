@@ -1,34 +1,115 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.App {
+  background-color: #000000;
+  min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.retro-game-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.retro-button {
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
 }
 
-.App-link {
-    color: #61dafb;
+.retro-button:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+  transform: translateY(-2px);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Retro scanlines effect */
+canvas::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    transparent 50%, 
+    rgba(0, 255, 65, 0.05) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+/* Retro glow effects */
+.retro-game-container h1 {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.retro-game-container p {
+  text-shadow: 0 0 5px currentColor;
+}
+
+/* Custom scrollbar for retro feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00FF41;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00CC33;
+}
+
+/* Retro font loading */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+body {
+  font-family: 'Orbitron', 'Courier New', monospace !important;
+  background-color: #000;
+  color: #00FF41;
+}
+
+/* Animation for game elements */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Retro card styling */
+.bg-gray-900 {
+  background: linear-gradient(145deg, #1a1a1a, #0f0f0f) !important;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 255, 65, 0.1),
+    0 0 30px rgba(0, 255, 65, 0.2) !important;
+}
+
+/* Game screen effects */
+canvas {
+  filter: contrast(1.1) brightness(1.05);
+  border-radius: 8px;
+}
+
+/* Retro text styling */
+.font-mono {
+  font-family: 'Orbitron', 'Courier New', monospace !important;
+  letter-spacing: 1px;
+}
+
+/* Birthday theme colors */
+.text-red-500 {
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.border-green-500 {
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
 }
